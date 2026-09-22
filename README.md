@@ -6,7 +6,7 @@ Mail: soufian.elouazzani@etu.univ-grenoble-alpes.fr
 
 The folder Communication channel contains the answer for this exercice:
 
-![Communication channel Ex](Communication-Channels/images/Exercice.png)
+![Communication channel Ex](CommunicationChannels/images/Exercice.png)
 
 To run the code execute these commands from the CommunicationChannels folder:
 ```
