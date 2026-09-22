@@ -8,8 +8,4 @@ The folder Communication channel contains the answer for this exercice:
 
 ![Communication channel Ex](CommunicationChannels/images/Exercice.png)
 
-To run the code execute these commands from the CommunicationChannels folder:
-```
-javac -d bin src/com/channel/system/*.java
-java -cp bin com.channel.system.Main
-```
+To run the code on eclipse, click on the test file, Click right -> run as java application
