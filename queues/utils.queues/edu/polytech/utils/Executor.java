@@ -108,6 +108,8 @@ public class Executor extends Thread {
           if (queue == null)
             sleep();
           e = queue;
+          if (e == null)
+            continue;
           if (queue == last)
             queue = last = null;
           else
@@ -127,11 +129,13 @@ public class Executor extends Thread {
   }
 
   private void checkDelayed(long now) {
-    Event e = delayed;
-    while (e != null && e.eta <= now) {
-      post(e.task, e.r);
-      delayed = delayed.next;
-      e = delayed;
+    synchronized (this) {
+      Event e = delayed;
+      while (e != null && e.eta <= now) {
+        post(e.task, e.r);
+        delayed = delayed.next;
+        e = delayed;
+      }
     }
   }
 
@@ -150,15 +154,16 @@ public class Executor extends Thread {
     return task;
   }
 
-  public void post(Task t, Runnable r) {
+  public synchronized void post(Task t, Runnable r) {
     CTask task = (CTask) t;
     if (last == null)
       queue = last = new Event(task, r);
     else
       last = new Event(last, task, r);
+    notifyAll();
   }
 
-  public void post(Task t, Runnable r, int delay) {
+  public synchronized void post(Task t, Runnable r, int delay) {
     CTask task = (CTask) t;
     long eta = System.currentTimeMillis() + delay;
     if (delayed == null)
@@ -175,13 +180,20 @@ public class Executor extends Thread {
         new Event(p, task, r, eta);
       }
     }
+    notifyAll();
   }
 
   private void sleep() {
-    while (queue != null) {
+    while (queue == null) {
       try {
-        wait(100);
-        checkDelayed(System.currentTimeMillis());
+        if (delayed == null) {
+          wait();
+        } else {
+          long waitMs = delayed.eta - System.currentTimeMillis();
+          if (waitMs <= 0)
+            return;
+          wait(waitMs);
+        }
       } catch (InterruptedException ex) {
         // nothing to do here.
       }
